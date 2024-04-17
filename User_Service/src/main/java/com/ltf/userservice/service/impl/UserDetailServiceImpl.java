@@ -13,15 +13,15 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class UserDetailServiceImpl implements UserDetailService {
-	
+
 	@Autowired
 	private UserRepository userRepository;
 
 	@Override
 	@Transactional
 	public UserDetailsService userDetailsService() {
-		return new UserDetailsService() {
-			
+		return new UserDetailsService() {	
+
 			@Override
 			public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 				// TODO Auto-generated method stub

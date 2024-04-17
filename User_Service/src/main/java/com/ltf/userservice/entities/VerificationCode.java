@@ -1,5 +1,9 @@
 package com.ltf.userservice.entities;
 
+import java.util.Date;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,6 +12,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
 @Table(name = "verification_code")
@@ -27,17 +33,31 @@ public class VerificationCode {
 	@JoinColumn(name = "user_id")
 	private User user;
 
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "exp", nullable = false, updatable = false)
+	@CreationTimestamp
+	private Date exp;
+
 	public VerificationCode() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public VerificationCode(Long id, Integer verificationToken, boolean isVerified, User user) {
+	public VerificationCode(Long id, Integer verificationToken, boolean isVerified, User user, Date exp) {
 		super();
 		this.id = id;
 		this.verificationToken = verificationToken;
 		this.isVerified = isVerified;
 		this.user = user;
+		this.exp = exp;
+	}
+
+	public Date getExp() {
+		return exp;
+	}
+
+	public void setExp(Date exp) {
+		this.exp = exp;
 	}
 
 	public Long getId() {

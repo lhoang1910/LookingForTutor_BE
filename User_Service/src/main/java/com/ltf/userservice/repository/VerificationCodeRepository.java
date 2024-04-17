@@ -6,7 +6,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.ltf.userservice.entities.User;
 import com.ltf.userservice.entities.VerificationCode;
+
+import jakarta.transaction.Transactional;
 
 @Repository
 public interface VerificationCodeRepository extends JpaRepository<VerificationCode, Long> {
@@ -15,4 +18,9 @@ public interface VerificationCodeRepository extends JpaRepository<VerificationCo
 	@Modifying
 	@Query("UPDATE VerificationCode vc SET vc.verificationToken = null WHERE vc.user.id = :userId")
 	void deleteToken(@Param("userId") Long userId);
+
+	@Transactional
+	void deleteVerificationTokenByUser(User user);
+
+	VerificationCode findByUser(User user);
 }

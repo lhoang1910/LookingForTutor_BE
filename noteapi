@@ -1,0 +1,15 @@
+- Discovery_Server
+- Api_Gateway
+- User_Service:
+	+ AuthController: signup, signin, verify, send-token, forget-password (Không cần đăng nhập)
+	+ UserController: current, update-profile, getUserById, changepassword (Đăng nhập, tất cả các role)
+	note: *đăng ký tài khoản hay forget-password đều gọi tới send-token
+		*trong dto changepassword có email nhưng email lấy luôn từ currentUser
+		*forgetpassword > nhập đúng password thì chuyển tới changepassword nhưng bỏ trường mật khẩu cũ và email đi đi (email tự lấy từ trước đó)
+=> 9 api
+
+- Tutor_Service:
+	+ update-profile, update-img, get-profile/{id}(lấy ra toàn bộ thông tin của tutor bao gồm cả thông tin từ userservice)(Đăng nhập)
+	
+
+

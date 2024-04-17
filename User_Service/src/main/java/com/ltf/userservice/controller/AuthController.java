@@ -5,9 +5,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ltf.userservice.dto.request.CreateAccountRequest;
+import com.ltf.userservice.dto.request.ResetPasswordRequest;
 import com.ltf.userservice.dto.request.SignInRequest;
 import com.ltf.userservice.dto.request.VerifyRequest;
 import com.ltf.userservice.dto.response.AccountResponse;
@@ -40,5 +42,14 @@ public class AuthController {
 		return authService.signIn(signInRequest);
 	}
 	
+	@PostMapping("/send-token")
+	public AccountResponse sendVerificationCode(@RequestParam("email") String email) {
+		return authService.sendVerificationCode(email);
+	}
+	
+	@PutMapping("/forget-password")
+	public AccountResponse forgetPassword(@RequestBody ResetPasswordRequest request) {
+		return authService.forgetPassword(request);
+	}
 	
 }

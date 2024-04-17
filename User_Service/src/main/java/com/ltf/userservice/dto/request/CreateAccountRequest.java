@@ -1,5 +1,7 @@
 package com.ltf.userservice.dto.request;
 
+import com.ltf.userservice.entities.Role;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -32,20 +34,32 @@ public class CreateAccountRequest {
 	@Email(message = "Email không hợp lệ")
 	private String email;
 
-	@NotNull(message = "Địa chỉ rỗng")
-	@NotEmpty(message = "Địa chỉ rỗng")
-	private String address;
+	@NotNull(message = "Ngày sinh rỗng")
+	@NotEmpty(message = "Ngày sinh rỗng")
+	private String dateOfBirth;
 
 	@NotNull(message = "Số điện thoại rỗng")
 	@NotEmpty(message = "Số điện thoại rỗng")
 	@Size(min = 10, max = 12, message = "Vui lòng nhập đúng số điện thoại")
 	private String number;
 
-	private String role;
+	@NotNull(message = "Không được để trống giới tính")
+	@NotEmpty(message = "Không được để trống giới tính")
+	private String sex;
+
+	private Role role;
 
 	public CreateAccountRequest() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+
+	public Role getRole() {
+		return role;
 	}
 
 	public CreateAccountRequest(
@@ -54,18 +68,36 @@ public class CreateAccountRequest {
 			@NotNull(message = "Mật khẩu rỗng") @NotEmpty(message = "Mật khẩu rỗng") @Size(min = 6, max = 30, message = "Mật khẩu từ 6-30 ký tự") String password,
 			@NotNull(message = "Mật khẩu rỗng") @NotEmpty(message = "Mật khẩu rỗng") @Size(min = 6, max = 30, message = "Mật khẩu từ 6-30 ký tự") String confirmPassword,
 			@NotNull(message = "Email rỗng") @NotEmpty(message = "Email rỗng") @Size(min = 5, max = 30, message = "Email từ 5-30 ký tự") @Email(message = "Email không hợp lệ") String email,
-			@NotNull(message = "Địa chỉ rỗng") @NotEmpty(message = "Địa chỉ rỗng") String address,
+			@NotNull(message = "Ngày sinh rỗng") @NotEmpty(message = "Ngày sinh rỗng") String dateOfBirth,
 			@NotNull(message = "Số điện thoại rỗng") @NotEmpty(message = "Số điện thoại rỗng") @Size(min = 10, max = 12, message = "Vui lòng nhập đúng số điện thoại") String number,
-			String role) {
+			@NotNull(message = "Không được để trống giới tính") @NotEmpty(message = "Không được để trống giới tính") String sex,
+			Role role) {
 		super();
 		this.fullName = fullName;
 		this.username = username;
 		this.password = password;
 		this.confirmPassword = confirmPassword;
 		this.email = email;
-		this.address = address;
+		this.dateOfBirth = dateOfBirth;
 		this.number = number;
+		this.sex = sex;
 		this.role = role;
+	}
+
+	public String getSex() {
+		return sex;
+	}
+
+	public void setSex(String sex) {
+		this.sex = sex;
+	}
+
+	public String getDateOfBirth() {
+		return dateOfBirth;
+	}
+
+	public void setDateOfBirth(String dateOfBirth) {
+		this.dateOfBirth = dateOfBirth;
 	}
 
 	public String getFullName() {
@@ -108,14 +140,6 @@ public class CreateAccountRequest {
 		this.email = email;
 	}
 
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
 	public String getNumber() {
 		return number;
 	}
@@ -124,13 +148,4 @@ public class CreateAccountRequest {
 		this.number = number;
 	}
 
-	public String getRole() {
-		return role;
-	}
-
-	public void setRole(String role) {
-		this.role = role;
-	}
-	
-	
 }

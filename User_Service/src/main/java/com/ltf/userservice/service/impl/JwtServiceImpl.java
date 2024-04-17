@@ -26,27 +26,24 @@ public class JwtServiceImpl implements JwtService {
 	}
 
 	@Override
-	public String generateToken(String userName) {
-		  Map<String, Object> claims = new HashMap<>();
-		return createToken(claims, userName);
+	public String generateToken(String userName, String role) {
+		Map<String, Object> claims = new HashMap<>();
+		return createToken(claims, userName, role);
 	}
 
 	@Override
-	public String createToken(Map<String, Object> claims, String userName) {
-		// TODO Auto-generated method stub
-		return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(userName)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+	public String createToken(Map<String, Object> claims, String userName, String role) {
+		return Jwts.builder().setClaims(claims).setSubject(userName).claim("role", role)
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+				.signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
 	}
 
 	@Override
 	public Key getSignKey() {
 		// TODO Auto-generated method stub
-		 byte[] keyBytes = Decoders.BASE64.decode(SECRET);
-	     return Keys.hmacShaKeyFor(keyBytes);
+		byte[] keyBytes = Decoders.BASE64.decode(SECRET);
+		return Keys.hmacShaKeyFor(keyBytes);
 	}
 
 }
