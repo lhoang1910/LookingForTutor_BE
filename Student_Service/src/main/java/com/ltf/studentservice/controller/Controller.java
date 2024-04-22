@@ -2,20 +2,15 @@ package com.ltf.studentservice.controller;
 
 import java.util.List;
 
+import com.ltf.studentservice.dto.response.StudentProfileResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.ltf.studentservice.dto.request.AddStudentRequest;
 import com.ltf.studentservice.dto.response.StudentResponse;
 import com.ltf.studentservice.entities.Student;
 import com.ltf.studentservice.service.StudentService;
-import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/student")
@@ -24,28 +19,14 @@ public class Controller {
 	@Autowired
 	StudentService studentService;
 
-	@GetMapping("/all")
-	public List<Student> getAllStudent() {
-		return studentService.listStudent();
+	@PostMapping("/profile/update")
+	public ResponseEntity<StudentResponse> addStudent(@RequestBody AddStudentRequest request,  @RequestHeader("loggedInUser") String loggedInUser) {
+		return ResponseEntity.ok(studentService.updateStudentProfile(loggedInUser, request));
 	}
 
-	@GetMapping("/{id}")
-	public Student getStudent(@PathVariable long id) {
-		return studentService.getStudentById(id);
+	@PostMapping("/profile")
+	public ResponseEntity<StudentProfileResponse> currentStudentProfile(@RequestHeader("loggedInUser") String loggedInUser){
+		return ResponseEntity.ok(studentService.getCurrentStudentResponse(loggedInUser));
 	}
 
-	@PostMapping("/add")
-	public StudentResponse addStudent(@RequestBody AddStudentRequest request) {
-		return studentService.addStudent(request);
-	}
-
-	@PutMapping("/approve/{id}")
-	public StudentResponse approveResponse(@PathVariable long id) {
-		return studentService.approveStudent(id);
-	}
-
-	@DeleteMapping("/delete/{id}")
-	public StudentResponse deleteStudent(@PathVariable long id) {
-		return studentService.deleteStudent(id);
-	}
 }
