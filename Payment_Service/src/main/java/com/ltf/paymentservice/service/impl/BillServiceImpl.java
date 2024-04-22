@@ -1,5 +1,6 @@
 package com.ltf.paymentservice.service.impl;
 
+import com.ltf.paymentservice.Client.AdminClient;
 import com.ltf.paymentservice.Client.ClassClient;
 import com.ltf.paymentservice.Client.UserClient;
 import com.ltf.paymentservice.dto.request.CreateBillRequest;
@@ -24,6 +25,9 @@ public class BillServiceImpl implements BillService {
 
     @Autowired
     UserClient userClient;
+
+    @Autowired
+    AdminClient adminClient;
 
     @Override
     public String createBill(CreateBillRequest createBillRequest) {
@@ -61,9 +65,13 @@ public class BillServiceImpl implements BillService {
         Bill bill = repository.findByPaymentCode(paymentId);
         bill.setPaid(true);
         repository.save(bill);
+        long classId = Long.parseLong(bill.getDescription());
         if (paymentId.startsWith("TUT")){
             long tutorId = Long.parseLong(paymentId.substring(3));
-            classClient.addTutor(Long.parseLong(bill.getDescription()));
+            adminClient.paid(classId);
+            classClient.addTutor(classId);
+        } else {
+            classClient.paid(classId);
         }
         return "Thanh toán thành công";
     }

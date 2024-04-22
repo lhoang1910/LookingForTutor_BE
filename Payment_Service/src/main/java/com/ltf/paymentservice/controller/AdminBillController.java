@@ -1,6 +1,8 @@
 package com.ltf.paymentservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ltf.paymentservice.entities.Bill;
+import com.ltf.paymentservice.service.BillRedisService;
 import com.ltf.paymentservice.service.BillService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,9 @@ public class AdminBillController {
     @Autowired
     BillService service;
 
+    @Autowired
+    BillRedisService billRedisService;
+
     @GetMapping("/{id}")
     public ResponseEntity<Bill> getBillById(@PathVariable long id){
         return ResponseEntity.ok(service.getBill(id));
@@ -29,8 +34,23 @@ public class AdminBillController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Bill>> getALlBill(){
-        return ResponseEntity.ok(service.getALlBill());
+    public ResponseEntity<List<Bill>> getALlBill() throws JsonProcessingException {
+        List<Bill> bills = billRedisService.getAllBills();
+        if (bills != null) {
+            return ResponseEntity.ok(bills);
+        } else {
+            bills = service.getALlBill();
+            if (bills != null) {
+                try {
+                    billRedisService.saveAllBills(bills);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+                return ResponseEntity.ok(bills);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
     }
 
 }
