@@ -1,7 +1,9 @@
 package com.ltf.studentservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ltf.studentservice.dto.response.StudentProfileResponse;
 import com.ltf.studentservice.entities.Student;
+import com.ltf.studentservice.service.StudentRedisService;
 import com.ltf.studentservice.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +20,27 @@ public class StudentAdminController {
     @Autowired
     StudentService studentService;
 
+    @Autowired
+    StudentRedisService studentRedisService;
+
     @GetMapping("/all")
-    public ResponseEntity<List<StudentProfileResponse>> getAllStudent() {
-        return ResponseEntity.ok(studentService.listStudent());
+    public ResponseEntity<List<StudentProfileResponse>> getAllStudent() throws JsonProcessingException {
+        List<StudentProfileResponse> students = studentRedisService.getAllStudents();
+        if (students != null){
+            return ResponseEntity.ok(students);
+        } else {
+            students = studentService.listStudent();
+            if (students != null){
+                try {
+                    studentRedisService.saveAllStudents(students);
+                } catch (JsonProcessingException e){
+                    e.printStackTrace();
+                }
+                return ResponseEntity.ok(students);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
     }
 
     @GetMapping("/{id}")
