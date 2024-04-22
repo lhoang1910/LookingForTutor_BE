@@ -9,10 +9,16 @@ import com.ltf.classervice.entities.Class;
 
 @Repository
 public interface ClassRepository extends JpaRepository<com.ltf.classervice.entities.Class, Long>{
-	List<Class> findByHadTutorFalse();
+    List<Class> findByIsApprovedFalse();
 
-	List<Class> findByHadTutorTrue();
+	List<Class> findByIsApprovedTrue();
 
-	Class findByIdAndHadTutorFalse(long id);
+    List<Class> findAllByStudentId(long id);
+
+    List<Class> findAllByIsPaidTrue();
+
+    List<Class> findAllByIsPaidFalse();
+
+    List<Class> findByIsPaidAndHadTutor(boolean isPaid, boolean hadTutor);
 
 }

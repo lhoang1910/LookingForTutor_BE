@@ -1,23 +1,24 @@
 
 package com.ltf.classervice.service.Impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.ltf.classervice.client.StudentClient;
+import com.ltf.classervice.client.PaymentClient;
+import com.ltf.classervice.dto.request.CreateBillRequest;
 import com.ltf.classervice.dto.request.CreateClassRequest;
-import com.ltf.classervice.dto.response.ClassInfoResponse;
 import com.ltf.classervice.dto.response.ClassResponse;
 import com.ltf.classervice.dto.response.StudentResponse;
 import com.ltf.classervice.entities.Class;
+import jakarta.ws.rs.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+import com.ltf.classervice.client.StudentClient;
 import com.ltf.classervice.repository.ClassRepository;
 import com.ltf.classervice.service.ClassService;
 
-import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotFoundException;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ClassServiceImpl implements ClassService {
@@ -25,123 +26,147 @@ public class ClassServiceImpl implements ClassService {
 	@Autowired
 	ClassRepository classRepository;
 
-	private final StudentClient studentClient;
+	@Autowired
+	StudentClient studentClient;
 
 	@Autowired
-	public ClassServiceImpl(StudentClient studentClient) {
-		super();
-		this.studentClient = studentClient;
-	}
+	private JavaMailSender javaMailSender;
+
+	@Autowired
+	PaymentClient paymentClient;
 
 	@Override
-	@Transactional
-	public ClassResponse createClass(CreateClassRequest classDTO, long userId) {
+	public ClassResponse createClass(CreateClassRequest request, String loggedInUser) {
 
-		StudentResponse studentResponse = studentClient.getStudentInfo(userId);
+		StudentResponse student= studentClient.currentStudentProfile(loggedInUser);
 
-		if (studentResponse != null && studentResponse.isApproved()) {
-			Class newClass = new Class();
-			newClass.setSubject(classDTO.getSubject());
-			newClass.setGrade(classDTO.getGrade());
-			newClass.setNumberOfWeek(classDTO.getNumberOfWeek());
-			newClass.setTutorSex(classDTO.getTutorSex());
-			newClass.setClassTime(classDTO.getClassTime());
-			newClass.setFurtherDescription(classDTO.getFurtherDescription());
-			newClass.setAdmissionFee(classDTO.getAdmissionFee());
-			newClass.setAddress(classDTO.getAddress());
-			newClass.setHadTutor(false);
-			newClass.setStudentId(userId);
-			newClass.setTution(classDTO.getTution());
-			classRepository.save(newClass);
+		Class newClass = new Class();
+		newClass.setStudentId(student.getStudentId());
+		newClass.setTutorSex(request.getTutorSex());
+		newClass.setAddress(request.getAddress());
+		newClass.setAdmissionFee(request.getAdmissionFee());
+		newClass.setApproved(false);
+		newClass.setFurtherDescription(request.getFurtherDescription());
+		newClass.setGrade(request.getGrade());
+		newClass.setHoursPerSession(request.getHoursPerSession());
+		newClass.setNumberOfWeek(request.getNumberOfWeek());
+		newClass.setStartTime(request.getStartTime());
+		newClass.setSubject(request.getSubject());
+		newClass.setTution(request.getTution());
+		newClass.setHadTutor(false);
+		newClass.setPaid(false);
 
-			return new ClassResponse("Thành công", "Thêm lớp học thành công");
-		} else {
-			return new ClassResponse("Lỗi", "Học sinh không tồn tại hoặc chưa được phê duyệt");
-		}
+		return new ClassResponse("Đăng ký lớp thành công", "Vui lòng chờ phản hồi từ admin");
 	}
 
 	@Override
 	public List<Class> classes() {
-		// TODO Auto-generated method stub
 		List<Class> classes = classRepository.findAll();
 		return classes;
 	}
 
 	@Override
 	public List<Class> getUnapprovedClasses() {
-		return classRepository.findByHadTutorFalse();
+		List<Class> unapprovedClasses = classRepository.findByIsApprovedFalse();
+		return unapprovedClasses;
 	}
 
 	@Override
 	public List<Class> getApprovedClasses() {
-		return classRepository.findByHadTutorTrue();
+		List<Class> approvedClasses = classRepository.findByIsApprovedTrue();
+		return approvedClasses;
 	}
 
 	@Override
 	public Class getClassById(long id) {
-		return classRepository.findById(id).orElseThrow(() -> new NotFoundException("Lớp học không tồn tại"));
+		Class aClass = classRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Không tồn tại lớp với id này"));
+		return aClass;
 	}
 
 	@Override
-	public List<ClassInfoResponse> getAllClasses() {
-		List<Class> classes = classRepository.findByHadTutorFalse();
-		List<ClassInfoResponse> classInfoResponses = new ArrayList<>();
-
-		for (Class classEntity : classes) {
-			ClassInfoResponse classInfoResponse = new ClassInfoResponse();
-			classInfoResponse.setClassId(classEntity.getId());
-			classInfoResponse.setSubject(classEntity.getSubject());
-			classInfoResponse.setGrade(classEntity.getGrade());
-			classInfoResponse.setNumberOfWeek(classEntity.getNumberOfWeek());
-			classInfoResponse.setTutorSex(classEntity.getTutorSex());
-			classInfoResponse.setClassTime(classEntity.getClassTime());
-			classInfoResponse.setFurtherDescription(classEntity.getFurtherDescription());
-			classInfoResponse.setTution(classEntity.getTution());
-			classInfoResponse.setAddress(classEntity.getAddress());
-			classInfoResponse.setAdmissionFee(classEntity.getAdmissionFee());
-
-			StudentResponse studentResponse = studentClient.getStudentInfo(classEntity.getStudentId());
-			if (studentResponse != null) {
-				classInfoResponse.setStudentFullName(studentResponse.getFullName());
-				classInfoResponse.setStudentOld(studentResponse.getOld());
-				classInfoResponse.setStudentSex(studentResponse.getSex());
-				classInfoResponse.setStudentGrade(studentResponse.getGrade());
-			}
-
-			classInfoResponses.add(classInfoResponse);
-		}
-
-		return classInfoResponses;
+	public List<Class> studentClasseseById(long id) {
+		List<Class> classes = classRepository.findAllByStudentId(id);
+		return classes;
 	}
 
 	@Override
-	public ClassInfoResponse getClassInfoById(long id) {
-		// Tìm kiếm thông tin lớp theo ID và hadTutor bằng false
-		Class classEntity = classRepository.findByIdAndHadTutorFalse(id);
-		if (classEntity == null) {
-			return null;
-		}
-		ClassInfoResponse classInfoResponse = new ClassInfoResponse();
-		classInfoResponse.setClassId(classEntity.getId());
-		classInfoResponse.setSubject(classEntity.getSubject());
-		classInfoResponse.setGrade(classEntity.getGrade());
-		classInfoResponse.setNumberOfWeek(classEntity.getNumberOfWeek());
-		classInfoResponse.setTutorSex(classEntity.getTutorSex());
-		classInfoResponse.setClassTime(classEntity.getClassTime());
-		classInfoResponse.setFurtherDescription(classEntity.getFurtherDescription());
-		classInfoResponse.setTution(classEntity.getTution());
-		classInfoResponse.setAdmissionFee(classEntity.getAdmissionFee());
-		classInfoResponse.setAddress(classEntity.getAddress());
-
-		// Lấy thông tin học sinh từ StudentService
-		StudentResponse studentResponse = studentClient.getStudentInfo(classEntity.getStudentId());
-		if (studentResponse != null) {
-			classInfoResponse.setStudentFullName(studentResponse.getFullName());
-			classInfoResponse.setStudentOld(studentResponse.getOld());
-			classInfoResponse.setStudentSex(studentResponse.getSex());
-			classInfoResponse.setStudentGrade(studentResponse.getGrade());
-		}
-		return classInfoResponse;
+	public List<Class> currentStudentClasses(String loggedInUser) {
+		StudentResponse studentResponse = studentClient.currentStudentProfile(loggedInUser);
+		List<Class> classes = classRepository.findAllByStudentId(studentResponse.getStudentId());
+		return classes;
 	}
 
+	@Override
+	public ClassResponse approveClass(long id) {
+		Class aClass = classRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Không tìm thấy class với id này"));
+		aClass.setApproved(true);
+		aClass.setTimeApprove(LocalDateTime.now());
+		classRepository.save(aClass);
+		CreateBillRequest createBillRequest = new CreateBillRequest();
+		createBillRequest.setPaymentCode("CLASS"+aClass.getId());
+		long aOM = (long) (aClass.getAdmissionFee() * aClass.getTution() * 0.1);
+		createBillRequest.setAmountOfMoney(aOM);
+		createBillRequest.setPaid(false);
+		StudentResponse student = studentClient.getStudent(aClass.getStudentId());
+		createBillRequest.setUserId(student.getUserId());
+		createBillRequest.setDescription(String.valueOf(aClass.getId()));
+		paymentClient.createBill(createBillRequest);
+		return new ClassResponse("Duyệt lớp thành công", "Lớp vào trạng thái chờ thanh toán");
+	}
+
+	@Override
+	public ClassResponse deleteClass(long id) {
+		Class aClass = classRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Không tìm thấy class với id này"));
+		classRepository.deleteById(aClass.getId());
+		return new ClassResponse("Xóa lớp thành công", "Mã lớp trống");
+	}
+
+	@Override
+	public List<Class> getPaid() {
+		List<Class> classes = classRepository.findAllByIsPaidTrue();
+		return classes;
+	}
+
+	@Override
+	public List<Class> getUnPaid() {
+		List<Class> classes = classRepository.findAllByIsPaidFalse();
+		return classes;
+	}
+
+	@Override
+	public String hadTutor(long id) {
+		Class aClass = classRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Không tồn tại class với id này"));
+		aClass.setHadTutor(true);
+		classRepository.save(aClass);
+		return "Thêm gia sư thành công";
+	}
+
+	@Override
+	public List<Class> getClassesPaidWithoutTutor() {
+		List<Class> classes = classRepository.findByIsPaidAndHadTutor(true, false);
+		return classes;
+	}
+
+	@Override
+	public List<Class> getClassesHadTutor() {
+		List<Class> classes = classRepository.findByIsPaidAndHadTutor(true, true);
+		return classes;
+	}
+
+	private void sendVerificationEmail(StudentResponse studentResponse, Class aClass) {
+		String subject = "THÔNG BÁO VỀ ĐĂNG KÝ LỚP HỌC: ";
+		String body = "Kính chào " + studentResponse.getFullName() + ", lớp của bạn đa được duyệt, vui lòng thanh toán phí đăng ký lớp trong 24h \n " +
+				"mã thanh toán là: " + "CLASS"+aClass.getId();
+
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setTo(studentResponse.getEmail());
+		message.setSubject(subject);
+		message.setText(body);
+
+		javaMailSender.send(message);
+	}
 }
