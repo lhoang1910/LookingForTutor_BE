@@ -27,32 +27,40 @@ public class RoleCheckFilter {
 		if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
 			token = token.substring(7);
 			String role = jwtUtil.extractRole(token);
-			
-			System.out.println(role);
-			
-			boolean allowAccess = createAccessConditions(role, path);
 
-			if (!allowAccess) {
-				exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-				return exchange.getResponse().setComplete();
+			System.out.println(role);
+
+			if (role != null) {
+				boolean allowAccess = false;
+
+				switch (role) {
+					case "ROLE_ADMIN":
+						allowAccess = true;
+						break;
+					case "ROLE_TUTOR":
+						allowAccess = path.startsWith("/api/auth") ||
+								path.startsWith("/api/user") ||
+								path.startsWith("/api/tutor");
+						break;
+					case "ROLE_STUDENT":
+						allowAccess = path.startsWith("/api/auth") ||
+								path.startsWith("/api/user") ||
+								path.startsWith("/api/student");
+						break;
+					default:
+						break;
+				}
+
+				if (!allowAccess) {
+					exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+					return exchange.getResponse().setComplete();
+				}
 			}
 		}
 
 		exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-		
+
 		return exchange.getResponse().setComplete();
 	}
 
-	private boolean createAccessConditions(String role, String path) {
-		switch (role) {
-		case "ROLE_ADMIN":
-			return path.startsWith("/api/auth/") || path.startsWith("/api/user/") || path.startsWith("/api/tutor/")
-					|| path.startsWith("/api/student/") || path.startsWith("/api/admin/");
-		case "ROLE_TUTOR":
-			return path.startsWith("/api/auth/") || path.startsWith("/api/user/") || path.startsWith("/api/tutor/")
-					|| path.startsWith("/api/student/add") || path.startsWith("/api/admin/register-class");
-		default:
-			return path.startsWith("/api/auth/") || path.startsWith("/api/student/add") || path.startsWith("/api/info/all");
-		}
-	}
 }

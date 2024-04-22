@@ -13,4 +13,3 @@ RUN ./mvnw dependency:go-offline
 COPY src ./src
 #run inside container
 CMD ["./mvnw", "spring-boot:run"] 
-
