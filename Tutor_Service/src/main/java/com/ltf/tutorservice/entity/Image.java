@@ -8,9 +8,17 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "image")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Image {
 	
 	@Id
@@ -26,54 +34,5 @@ public class Image {
 	@OneToOne
     @PrimaryKeyJoinColumn
     private Tutor tutor;
-
-	public Image() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-	
-	
-	public long getId() {
-		return id;
-	}
-
-
-	public void setId(long id) {
-		this.id = id;
-	}
-
-
-	public Tutor getTutor() {
-		return tutor;
-	}
-
-
-	public void setTutor(Tutor tutor) {
-		this.tutor = tutor;
-	}
-
-
-	public byte[] getCccdImage() {
-		return cccdImage;
-	}
-
-	public void setCccdImage(byte[] cccdImage) {
-		this.cccdImage = cccdImage;
-	}
-
-	public byte[] getStudentCardImage() {
-		return studentCardImage;
-	}
-
-	public void setStudentCardImage(byte[] studentCardImage) {
-		this.studentCardImage = studentCardImage;
-	}
-
-	public Image(byte[] cccdImage, byte[] studentCardImage) {
-		super();
-		this.cccdImage = cccdImage;
-		this.studentCardImage = studentCardImage;
-	}
-
 	
 }

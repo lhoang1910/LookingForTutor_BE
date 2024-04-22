@@ -1,39 +1,19 @@
 package com.ltf.tutorservice.dto.request;
 
 import jakarta.persistence.Lob;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
 public class AddImageRequest {
 	@Lob
 	private byte[] cccdImage;
 
 	@Lob
 	private byte[] studentCardImage;
-
-	public AddImageRequest() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
-	public AddImageRequest(byte[] cccdImage, byte[] studentCardImage) {
-		super();
-		this.cccdImage = cccdImage;
-		this.studentCardImage = studentCardImage;
-	}
-
-	public byte[] getCccdImage() {
-		return cccdImage;
-	}
-
-	public void setCccdImage(byte[] cccdImage) {
-		this.cccdImage = cccdImage;
-	}
-
-	public byte[] getStudentCardImage() {
-		return studentCardImage;
-	}
-
-	public void setStudentCardImage(byte[] studentCardImage) {
-		this.studentCardImage = studentCardImage;
-	}
-
 }

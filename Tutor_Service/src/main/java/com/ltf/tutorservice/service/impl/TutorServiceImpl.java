@@ -1,6 +1,8 @@
 package com.ltf.tutorservice.service.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,12 +102,12 @@ public class TutorServiceImpl implements TutorService {
 	}
 
 	@Override
-	public TutorProfileResponse getTutorInfo(long tutorId, String loggedInUser) {
+	public TutorProfileResponse getCurrentTutor(String loggedInUser) {
 		// Lấy thông tin người dùng từ UserService
 		UserProfile userProfile = userServiceClient.getCurrentUser(loggedInUser);
 
 		// Lấy thông tin của gia sư từ TutorService
-		Optional<Tutor> optionalTutor = tutorRepository.findById(tutorId);
+		Optional<Tutor> optionalTutor = tutorRepository.findByUserId(userProfile.getId());
 		Optional<Image> img = imageRepository.findByTutor(optionalTutor);
 
 		if (optionalTutor.isPresent()) {
@@ -119,6 +121,8 @@ public class TutorServiceImpl implements TutorService {
 			tutorProfileResponse.setAddress(userProfile.getAddress());
 			tutorProfileResponse.setEmail(userProfile.getEmail());
 			tutorProfileResponse.setNumber(userProfile.getNumber());
+			tutorProfileResponse.setSex(userProfile.getSex());
+			tutorProfileResponse.setDateOfBirth(userProfile.getDateOfBirth());
 
 			tutorProfileResponse.setSchool(tutor.getSchool());
 			tutorProfileResponse.setMajor(tutor.getMajor());
@@ -131,7 +135,7 @@ public class TutorServiceImpl implements TutorService {
 
 			return tutorProfileResponse;
 		} else {
-			throw new NotFoundException("Không tìm thấy thông tin của gia sư với ID: " + tutorId);
+			throw new NotFoundException("Không tìm thấy thông tin của gia sư với ID: " + userProfile.getId());
 		}
 	}
 
@@ -154,6 +158,8 @@ public class TutorServiceImpl implements TutorService {
 			tutorProfileResponse.setAddress(userProfile.getAddress());
 			tutorProfileResponse.setEmail(userProfile.getEmail());
 			tutorProfileResponse.setNumber(userProfile.getNumber());
+			tutorProfileResponse.setSex(userProfile.getSex());
+			tutorProfileResponse.setDateOfBirth(userProfile.getDateOfBirth());
 
 			tutorProfileResponse.setSchool(tutor.getSchool());
 			tutorProfileResponse.setMajor(tutor.getMajor());
@@ -168,6 +174,55 @@ public class TutorServiceImpl implements TutorService {
 		} else {
 			throw new NotFoundException("Không tìm thấy thông tin của gia sư với ID: " + tutorId);
 		}
+	}
+
+	@Override
+	public List<TutorProfileResponse> getALlTutor() {
+		List<TutorProfileResponse> tutorProfiles = new ArrayList<>();
+
+		// Lấy danh sách tất cả các gia sư từ cơ sở dữ liệu
+		List<Tutor> tutors = tutorRepository.findAll();
+
+		for (Tutor tutor : tutors) {
+			// Lấy thông tin hình ảnh của gia sư
+			Optional<Image> img = imageRepository.findByTutor(tutor);
+
+			// Kiểm tra xem gia sư có tồn tại không
+			if (tutor != null) {
+				// Tạo một đối tượng TutorProfileResponse mới
+				TutorProfileResponse tutorProfileResponse = new TutorProfileResponse();
+
+				// Lấy thông tin user profile của gia sư từ userServiceClient
+				UserProfile userProfile = userServiceClient.getUserInfoById(tutor.getUserId());
+
+				// Thiết lập thông tin cho đối tượng TutorProfileResponse
+				tutorProfileResponse.setFullName(userProfile.getFullName());
+				tutorProfileResponse.setUsername(userProfile.getUsername());
+				tutorProfileResponse.setAddress(userProfile.getAddress());
+				tutorProfileResponse.setEmail(userProfile.getEmail());
+				tutorProfileResponse.setNumber(userProfile.getNumber());
+				tutorProfileResponse.setSex(userProfile.getSex());
+				tutorProfileResponse.setDateOfBirth(userProfile.getDateOfBirth());
+				tutorProfileResponse.setSchool(tutor.getSchool());
+				tutorProfileResponse.setMajor(tutor.getMajor());
+				tutorProfileResponse.setStartTime(tutor.getStartTime());
+				tutorProfileResponse.setEndTime(tutor.getEndTime());
+				tutorProfileResponse.setHadExp(tutor.isHadExp());
+				tutorProfileResponse.setExpDescription(tutor.getExpDescription());
+
+				// Nếu hình ảnh của gia sư tồn tại, thiết lập nó cho đối tượng TutorProfileResponse
+				if (img.isPresent()) {
+					Image image = img.get();
+					tutorProfileResponse.setCccdImage(image.getCccdImage());
+					tutorProfileResponse.setStudentCardImage(image.getStudentCardImage());
+				}
+
+				// Thêm đối tượng TutorProfileResponse vào danh sách
+				tutorProfiles.add(tutorProfileResponse);
+			}
+		}
+
+		return tutorProfiles;
 	}
 
 }

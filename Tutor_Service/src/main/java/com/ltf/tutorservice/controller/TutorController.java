@@ -1,6 +1,9 @@
 package com.ltf.tutorservice.controller;
 
+import com.ltf.tutorservice.entity.Tutor;
+import com.ltf.tutorservice.service.TutorRedisService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +21,8 @@ import com.ltf.tutorservice.dto.response.TutorResponse;
 import com.ltf.tutorservice.dto.response.UserProfile;
 import com.ltf.tutorservice.service.TutorService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/tutor")
 public class TutorController {
@@ -27,38 +32,31 @@ public class TutorController {
 
 	@Autowired
 	TutorService tutorService;
+
+	@Autowired
+	TutorRedisService tutorRedisService;
 	
 	@GetMapping("/")
 	public String testApi() {
-		return "Thanh cong";
-	}
-
-	@GetMapping("/current")
-	public UserProfile getCurrentUser(@RequestHeader("loggedInUser") String loggedInUser) {
-		UserProfile userProfile = userServiceClient.getCurrentUser(loggedInUser);
-		return userProfile;
+		return "Hello World";
 	}
 	
-	@PostMapping("/update-profile")
-	public TutorResponse updateProfile(@RequestBody AddTutorProfileRquest addTutorProfileRquest, @RequestHeader("loggedInUser") String loggedInUser) {
-		return tutorService.updateTutorProfile(loggedInUser, addTutorProfileRquest);
+	@PostMapping("/profile/update")
+	public ResponseEntity<TutorResponse> updateProfile(@RequestBody AddTutorProfileRquest addTutorProfileRquest, @RequestHeader("loggedInUser") String loggedInUser) {
+		tutorRedisService.clear();;
+		return ResponseEntity.ok(tutorService.updateTutorProfile(loggedInUser, addTutorProfileRquest));
 	}	
 	
-	@PostMapping("/update-img")
-	public TutorResponse updateImg(@RequestParam("cccd") MultipartFile cccd,
+	@PostMapping("/profile/img")
+	public ResponseEntity<TutorResponse> updateImg(@RequestParam("cccd") MultipartFile cccd,
 	                               @RequestParam("studentCard") MultipartFile studentCard,
 	                               @RequestHeader("loggedInUser") String loggedInUser) {
-	    return tutorService.updateTutorImg(loggedInUser, cccd, studentCard);
+	    return ResponseEntity.ok(tutorService.updateTutorImg(loggedInUser, cccd, studentCard));
 	}
 
-	
-	@GetMapping("/get-profile/{id}")
-	public TutorProfileResponse tutorProfileResponse(@RequestParam("id") long id, @RequestHeader("loggedInUser") String loggedInUser) {
-		return tutorService.getTutorInfo(id, loggedInUser);
+	@GetMapping("/profile")
+	public ResponseEntity<TutorProfileResponse> getCurrentTutorProfile(@RequestHeader("loggedInUser") String loggedInUser) {
+		return ResponseEntity.ok(tutorService.getCurrentTutor(loggedInUser));
 	}
-	
-	@GetMapping("/profile/{id}")
-	public TutorProfileResponse tutorProfileResponse(@PathVariable long id) {
-		return tutorService.getTutorInfoById(id);
-	}
+
 }
