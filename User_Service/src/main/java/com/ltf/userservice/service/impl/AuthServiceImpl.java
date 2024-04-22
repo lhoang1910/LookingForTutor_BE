@@ -98,6 +98,8 @@ public class AuthServiceImpl implements AuthService {
 					// Thiết lập Role
 					if (createAccountRequest.getRole().equals(Role.ROLE_TUTOR)) {
 						user.setRole(Role.ROLE_TUTOR);
+					} else if (createAccountRequest.getRole().equals(Role.ROLE_STUDENT)){
+						user.setRole(Role.ROLE_STUDENT);
 					} else {
 						user.setRole(Role.ROLE_ADMIN);
 					}

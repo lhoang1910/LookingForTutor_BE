@@ -1,6 +1,7 @@
 package com.ltf.userservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,23 +28,23 @@ public class UserController {
 
 	
 	@GetMapping("/current")
-	public UserProfileResponse getCurrentUser(@RequestHeader("loggedInUser") String username) {
-		return userService.getCurrentUser(username);
+	public ResponseEntity<UserProfileResponse> getCurrentUser(@RequestHeader("loggedInUser") String username) {
+		return ResponseEntity.ok(userService.getCurrentUser(username));
 	}
 	
 	@PutMapping("/update-profile")
-	public AccountResponse updateUserProfile(CreateAccountRequest accountRequest) {
-		return userService.updateProfile(accountRequest);
+	public ResponseEntity<AccountResponse> updateUserProfile(CreateAccountRequest accountRequest) {
+		return ResponseEntity.ok(userService.updateProfile(accountRequest));
 	}
-	
-	 @GetMapping("/{id}")
-	public UserProfileResponse getUserInfoById(@PathVariable long id) {
-		return userService.getUserById(id);
+
+	@GetMapping("/{id}")
+	public ResponseEntity<UserProfileResponse> getUserInfoById(@PathVariable long id) {
+		return ResponseEntity.ok(userService.getUserById(id));
 	}
 	 
 	 @PutMapping("/change-password")
-	 public AccountResponse changePassword(@RequestHeader("loggedInUser") String username, ResetPasswordRequest request){
-		 return userService.changePassword(username, request);
+	 public ResponseEntity<AccountResponse> changePassword(@RequestHeader("loggedInUser") String username, ResetPasswordRequest request){
+		 return ResponseEntity.ok(userService.changePassword(username, request));
 	 }
 	
 }

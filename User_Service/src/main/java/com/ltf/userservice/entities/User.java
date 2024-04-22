@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +22,8 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "user")
+@AllArgsConstructor
+@NoArgsConstructor
 public class User implements UserDetails {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,26 +40,6 @@ public class User implements UserDetails {
 	private Role role;
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
 	private VerificationCode verificationCode;
-
-	public User() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
-	public User(Long id, String fullName, String username, String password, String email, String number,
-			String dateOfBirth, Role role, VerificationCode verificationCode, String sex) {
-		super();
-		this.id = id;
-		this.fullName = fullName;
-		this.username = username;
-		this.password = password;
-		this.email = email;
-		this.number = number;
-		this.dateOfBirth = dateOfBirth;
-		this.role = role;
-		this.verificationCode = verificationCode;
-		this.sex = sex;
-	}
 
 	public String getSex() {
 		return sex;

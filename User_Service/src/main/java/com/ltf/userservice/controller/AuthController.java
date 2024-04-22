@@ -1,6 +1,7 @@
 package com.ltf.userservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,13 +29,13 @@ public class AuthController {
 	UserService userService;
 	
 	@PostMapping("/signup")
-	public AccountResponse signUp(@RequestBody CreateAccountRequest createAccountRequest) {
-		return authService.signUp(createAccountRequest);
+	public ResponseEntity<AccountResponse> signUp(@RequestBody CreateAccountRequest createAccountRequest) {
+		return ResponseEntity.ok(authService.signUp(createAccountRequest));
 	}
 	
 	@PutMapping("/verify")
-	public AccountResponse verify(@RequestBody VerifyRequest verifyRequest) {
-		return authService.verifyAccount(verifyRequest);
+	public ResponseEntity<AccountResponse> verify(@RequestBody VerifyRequest verifyRequest) {
+		return ResponseEntity.ok(authService.verifyAccount(verifyRequest));
 	}
 	
 	@PostMapping("/signin")
@@ -43,13 +44,13 @@ public class AuthController {
 	}
 	
 	@PostMapping("/send-token")
-	public AccountResponse sendVerificationCode(@RequestParam("email") String email) {
-		return authService.sendVerificationCode(email);
+	public ResponseEntity<AccountResponse> sendVerificationCode(@RequestParam("email") String email) {
+		return ResponseEntity.ok(authService.sendVerificationCode(email));
 	}
 	
 	@PutMapping("/forget-password")
-	public AccountResponse forgetPassword(@RequestBody ResetPasswordRequest request) {
-		return authService.forgetPassword(request);
+	public ResponseEntity<AccountResponse> forgetPassword(@RequestBody ResetPasswordRequest request) {
+		return ResponseEntity.ok(authService.forgetPassword(request));
 	}
 	
 }
