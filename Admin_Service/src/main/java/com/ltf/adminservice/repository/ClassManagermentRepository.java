@@ -14,4 +14,13 @@ public interface ClassManagermentRepository extends JpaRepository<ClassManagerme
 
 	ClassManagerment findByTutorIdAndClassId(long tutorId, long classId);
 
+    List<ClassManagerment> findByApprovedTrue();
+
+	ClassManagerment findByClassId(long classId);
+
+    List<ClassManagerment> findAllByApproved(boolean b);
+
+	List<ClassManagerment> findAllByPaid(boolean b);
+
+	List<ClassManagerment> findAllByTutorId(long tutorId);
 }

@@ -35,4 +35,13 @@ public class ClassController {
 		return ResponseEntity.ok(service.getClassesPaidWithoutTutor());
 	}
 
+	@PostMapping("/paid/{id}")
+	ResponseEntity<String> paid(@PathVariable long id){
+		return ResponseEntity.ok(service.paid(id));
+	}
+
+	@PostMapping("/add-tutor/{id}")
+	public ResponseEntity<String> addTutor(@PathVariable long id){
+		return ResponseEntity.ok(service.hadTutor(id));
+	}
 }

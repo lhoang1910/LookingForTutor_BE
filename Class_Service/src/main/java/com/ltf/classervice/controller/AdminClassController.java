@@ -63,11 +63,6 @@ public class AdminClassController {
         return ResponseEntity.ok(classService.getPaid());
     }
 
-    @PostMapping("/add-tutor")
-    public ResponseEntity<String> addTutor(@PathVariable long id){
-        return ResponseEntity.ok(classService.hadTutor(id));
-    }
-
     @GetMapping("/had-tutor")
     public ResponseEntity<List<Class>> getClassesHadTutor(){
         return ResponseEntity.ok(classService.getClassesHadTutor());

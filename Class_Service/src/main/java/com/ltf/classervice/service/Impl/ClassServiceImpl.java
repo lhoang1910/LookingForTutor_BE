@@ -157,6 +157,15 @@ public class ClassServiceImpl implements ClassService {
 		return classes;
 	}
 
+	@Override
+	public String paid(long id) {
+		Class aClass = classRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("không tồn tại lớp với id này"));
+		aClass.setPaid(true);
+		classRepository.save(aClass);
+		return "Thanh toán thành công";
+	}
+
 	private void sendVerificationEmail(StudentResponse studentResponse, Class aClass) {
 		String subject = "THÔNG BÁO VỀ ĐĂNG KÝ LỚP HỌC: ";
 		String body = "Kính chào " + studentResponse.getFullName() + ", lớp của bạn đa được duyệt, vui lòng thanh toán phí đăng ký lớp trong 24h \n " +

@@ -25,4 +25,5 @@ public interface ClassService {
 	String hadTutor(long id);
 	List<Class> getClassesPaidWithoutTutor();
 	List<Class> getClassesHadTutor();
+	String paid(long id);
 }

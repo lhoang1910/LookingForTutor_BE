@@ -3,16 +3,35 @@ package com.ltf.adminservice.service;
 import java.util.List;
 
 import com.ltf.adminservice.dto.response.AdminResponse;
-import com.ltf.adminservice.dto.response.ClassFee;
 import com.ltf.adminservice.dto.response.TutorClassInfoResponse;
+import com.ltf.adminservice.entities.ClassManagerment;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 public interface AdminService {
-	AdminResponse registerClass(long tutorId, long classId);
+	AdminResponse registerClass(@RequestHeader("loggedInUser") String loggedInUser, long classId);
 
 	AdminResponse approveTutorWithClass(long id);
 
 	List<TutorClassInfoResponse> getAllUnapprovedClasses();
-	
-	ClassFee admissionClassFee (long id);
+
+	List<TutorClassInfoResponse> getAllApprovedClasses();
+
+	List<ClassManagerment> getAllCLassManagerment();
+
+	List<ClassManagerment> getAllApproved();
+
+	List<ClassManagerment> getAllUnapproved();
+
+	List<ClassManagerment> getALlPaid();
+
+	List<ClassManagerment> getAllUnPaid();
+
+	ClassManagerment getByClassId(long classId);
+
+	List<ClassManagerment> getAllByTutorId(long tutorId);
+
+	String paid(long classId);
+
+	ClassManagerment findById(long id);
 
 }
