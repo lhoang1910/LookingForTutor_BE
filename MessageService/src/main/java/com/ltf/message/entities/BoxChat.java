@@ -21,4 +21,13 @@ public class BoxChat {
     private long tutorId;
     
     private long studentId;
+
+    private MessageType messageType;
+
+    public enum MessageType {
+        CHAT,
+        JOIN,
+        LEAVE
+    }
+
 }
