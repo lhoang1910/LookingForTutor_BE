@@ -1,11 +1,11 @@
 
 package com.ltf.classervice.service.Impl;
 
+import com.ltf.classervice.client.AdminClient;
 import com.ltf.classervice.client.PaymentClient;
 import com.ltf.classervice.dto.request.CreateBillRequest;
 import com.ltf.classervice.dto.request.CreateClassRequest;
-import com.ltf.classervice.dto.response.ClassResponse;
-import com.ltf.classervice.dto.response.StudentResponse;
+import com.ltf.classervice.dto.response.*;
 import com.ltf.classervice.entities.Class;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,7 @@ import com.ltf.classervice.repository.ClassRepository;
 import com.ltf.classervice.service.ClassService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,6 +35,9 @@ public class ClassServiceImpl implements ClassService {
 
 	@Autowired
 	PaymentClient paymentClient;
+
+	@Autowired
+	AdminClient adminClient;
 
 	@Override
 	public ClassResponse createClass(CreateClassRequest request, String loggedInUser) {
@@ -164,6 +168,51 @@ public class ClassServiceImpl implements ClassService {
 		aClass.setPaid(true);
 		classRepository.save(aClass);
 		return "Thanh toán thành công";
+	}
+
+	@Override
+	public long getStudentByClassId(long classId) {
+		Class aClass = classRepository.findById(classId)
+				.orElseThrow(() -> new NotFoundException("Không tìm thấy class với id này"));
+		return aClass.getStudentId();
+	}
+
+	@Override
+	public ClassInfoResponse getClassStudentInfo(long id) {
+		Class aClass = classRepository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Không tồn tại class với id này"));
+		ClassInfoResponse classInfoResponse = new ClassInfoResponse();
+		classInfoResponse.setAddress(aClass.getAddress());
+		classInfoResponse.setAdmissionFee(aClass.getAdmissionFee());
+		classInfoResponse.setClassId(aClass.getId());
+		classInfoResponse.setFurtherDescription(aClass.getFurtherDescription());
+		classInfoResponse.setNumberOfWeek(aClass.getNumberOfWeek());
+		classInfoResponse.setSubject(aClass.getSubject());
+		classInfoResponse.setTution(aClass.getTution());
+		classInfoResponse.setTutorSex(aClass.getTutorSex());
+		classInfoResponse.setGrade(aClass.getGrade());
+		classInfoResponse.setStartTime(aClass.getStartTime());
+
+		StudentResponse studentResponse = studentClient.getStudent(aClass.getStudentId());
+		classInfoResponse.setStudentFullName(studentResponse.getFullName());
+		classInfoResponse.setStudentId(studentResponse.getStudentId());
+		classInfoResponse.setStudentOld(studentResponse.getOld());
+		return classInfoResponse;
+	}
+
+	@Override
+	public List<ListChatStudent> getListChatForStudent(String loggedInUser) {
+		StudentResponse std = studentClient.currentStudentProfile(loggedInUser);
+		List<Class> classes = classRepository.findAllByStudentId(std.getStudentId());
+		List<ListChatStudent> listChatStudents = new ArrayList<>();
+		for (Class aClass : classes){
+			ListChatStudent listChatStudent = new ListChatStudent();
+			TutorProfileResponse tutorProfileResponse = adminClient.getTutorByClassId(aClass.getId());
+			listChatStudent.setId(tutorProfileResponse.getTutorId());
+			listChatStudent.setUsername(tutorProfileResponse.getFullName());
+			listChatStudents.add(listChatStudent);
+		}
+		return listChatStudents;
 	}
 
 	private void sendVerificationEmail(StudentResponse studentResponse, Class aClass) {

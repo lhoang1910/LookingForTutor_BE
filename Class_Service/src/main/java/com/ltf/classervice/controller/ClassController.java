@@ -2,6 +2,8 @@ package com.ltf.classervice.controller;
 
 import java.util.List;
 
+import com.ltf.classervice.dto.response.ClassInfoResponse;
+import com.ltf.classervice.dto.response.ListChatStudent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,11 @@ public class ClassController {
 
 	@Autowired
 	ClassService service;
+
+	@GetMapping("/info/{id}")
+	public ResponseEntity<ClassInfoResponse> getClassInfoById(@PathVariable long id){
+		return ResponseEntity.ok(service.getClassStudentInfo(id));
+	}
 
 	@PostMapping("/create")
 	ResponseEntity<ClassResponse> createClass(CreateClassRequest request, @RequestHeader("loggedInUser") String loggedInUser){
@@ -43,5 +50,15 @@ public class ClassController {
 	@PostMapping("/add-tutor/{id}")
 	public ResponseEntity<String> addTutor(@PathVariable long id){
 		return ResponseEntity.ok(service.hadTutor(id));
+	}
+
+	@GetMapping("/get-student/{id}")
+	public ResponseEntity<?> getStudentId(@PathVariable long id){
+		return ResponseEntity.ok((service.getStudentByClassId(id)));
+	}
+
+	@GetMapping("/chat-list")
+	public ResponseEntity<List<ListChatStudent>> getListChatForStudent(@RequestHeader("loggedInUser") String loggedInUser){
+		return ResponseEntity.ok(service.getListChatForStudent(loggedInUser));
 	}
 }

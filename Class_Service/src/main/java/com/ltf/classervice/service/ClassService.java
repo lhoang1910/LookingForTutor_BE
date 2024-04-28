@@ -2,6 +2,8 @@ package com.ltf.classervice.service;
 
 import java.util.List;
 
+import com.ltf.classervice.dto.response.ClassInfoResponse;
+import com.ltf.classervice.dto.response.ListChatStudent;
 import org.springframework.stereotype.Service;
 
 import com.ltf.classervice.dto.request.CreateClassRequest;
@@ -26,4 +28,7 @@ public interface ClassService {
 	List<Class> getClassesPaidWithoutTutor();
 	List<Class> getClassesHadTutor();
 	String paid(long id);
+	long getStudentByClassId(long classId);
+	ClassInfoResponse getClassStudentInfo(long id);
+	List<ListChatStudent> getListChatForStudent(@RequestHeader("loggedInUser") String loggedInUser);
 }

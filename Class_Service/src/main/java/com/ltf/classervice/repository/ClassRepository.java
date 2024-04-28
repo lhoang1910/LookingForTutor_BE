@@ -21,4 +21,5 @@ public interface ClassRepository extends JpaRepository<com.ltf.classervice.entit
 
     List<Class> findByIsPaidAndHadTutor(boolean isPaid, boolean hadTutor);
 
+    Class findByClassId(long classId);
 }
