@@ -24,7 +24,7 @@ public class Tutor {
 	private String school;
 
 	private String major;
-
+ 	
 	private String startTime;
 
 	private String endTime;
