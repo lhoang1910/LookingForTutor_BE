@@ -1,12 +1,13 @@
 package com.ltf.adminservice.service;
 
-import com.ltf.adminservice.dto.response.TutorClassInfoResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.ltf.adminservice.entities.ClassManagerment;
 
 import java.util.List;
 
 public interface AdminRedisService {
-    List<ClassManagerment> saveAllClassManagerment();
-    List<ClassManagerment> getAllClassManagerment();
+    void saveAllClassManagerment(List<ClassManagerment> classManagerments) throws JsonProcessingException;
+    List<ClassManagerment> getAllClassManagerment() throws JsonProcessingException;
     void clear();
+
 }

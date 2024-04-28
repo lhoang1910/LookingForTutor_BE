@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.ltf.adminservice.client.PaymentClient;
 import com.ltf.adminservice.dto.request.CreateBillRequest;
+import com.ltf.adminservice.dto.response.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -13,10 +14,6 @@ import org.springframework.stereotype.Service;
 
 import com.ltf.adminservice.client.ClassClient;
 import com.ltf.adminservice.client.TutorClient;
-import com.ltf.adminservice.dto.response.AdminResponse;
-import com.ltf.adminservice.dto.response.ClassInfoResponse;
-import com.ltf.adminservice.dto.response.TutorClassInfoResponse;
-import com.ltf.adminservice.dto.response.TutorProfileResponse;
 import com.ltf.adminservice.entities.ClassManagerment;
 import com.ltf.adminservice.repository.ClassManagermentRepository;
 import com.ltf.adminservice.service.AdminService;
@@ -107,7 +104,7 @@ public class AdminServiceImpl implements AdminService {
 			tutorClassInfo.setGrade(classInfo.getGrade());
 			tutorClassInfo.setNumberOfWeek(classInfo.getNumberOfWeek());
 			tutorClassInfo.setTutorSex(classInfo.getTutorSex());
-			tutorClassInfo.setClassTime(classInfo.getClassTime());
+			tutorClassInfo.setStartTime(classInfo.getStartTime());
 			tutorClassInfo.setFurtherDescription(classInfo.getFurtherDescription());
 			tutorClassInfo.setAddress(classInfo.getAddress());
 			tutorClassInfo.setStudentFullName(classInfo.getStudentFullName());
@@ -157,7 +154,7 @@ public class AdminServiceImpl implements AdminService {
 			tutorClassInfo.setGrade(classInfo.getGrade());
 			tutorClassInfo.setNumberOfWeek(classInfo.getNumberOfWeek());
 			tutorClassInfo.setTutorSex(classInfo.getTutorSex());
-			tutorClassInfo.setClassTime(classInfo.getClassTime());
+			tutorClassInfo.setStartTime(classInfo.getStartTime());
 			tutorClassInfo.setFurtherDescription(classInfo.getFurtherDescription());
 			tutorClassInfo.setAddress(classInfo.getAddress());
 			tutorClassInfo.setStudentFullName(classInfo.getStudentFullName());
@@ -241,6 +238,30 @@ public class AdminServiceImpl implements AdminService {
 	public ClassManagerment findById(long id) {
 		ClassManagerment managerment = repository.findByClassId(id);
 		return null;
+	}
+
+	@Override
+	public List<ListChatTutor> listChatForTutor(String loggedInUser) {
+		TutorProfileResponse tutor = tutorClient.getCurrentTutorProfile(loggedInUser);
+		List<ListChatTutor> listChatTutors = new ArrayList<>();
+		List<ClassManagerment> managerments = repository.findAllByTutorIdAndPaid(tutor.getTutorId(), true);
+		for (ClassManagerment managerment : managerments){
+			ListChatTutor chatTutor = new ListChatTutor();
+			long classId = managerment.getClassId();
+			ClassInfoResponse classInfoResponse = classClient.getClassInfoById(classId);
+			chatTutor.setUsername(classInfoResponse.getStudentFullName());
+			chatTutor.setId(classInfoResponse.getStudentId());
+			listChatTutors.add(chatTutor);
+		}
+
+		return listChatTutors;
+	}
+
+	@Override
+	public TutorProfileResponse getTutorResponseByClassId(long classId) {
+		ClassManagerment managerment = repository.findByClassIdAndPaid(classId, true);
+		TutorProfileResponse response = tutorClient.tutorProfileResponse(managerment.getTutorId());
+		return response;
 	}
 
 	private void sendVerificationEmail(TutorProfileResponse tutor, ClassManagerment managerment) {

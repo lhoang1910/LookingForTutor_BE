@@ -8,12 +8,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClassInfoResponse {
+
+	private long studentId;
 	private long classId;
 	private String subject;
 	private String grade;
 	private double numberOfWeek;
 	private String tutorSex;
-	private String classTime;
+	private String startTime;
 	private String furtherDescription;
 	private String address;
 	private String studentFullName;

@@ -3,7 +3,7 @@ package com.ltf.adminservice.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ltf.adminservice.dto.response.TutorClassInfoResponse;
+import com.ltf.adminservice.entities.ClassManagerment;
 import com.ltf.adminservice.service.AdminRedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +16,8 @@ import java.util.List;
 
 
 @Service
-public class AdminRedisServiceImpl {
-    private static final String UNAPPROVED_CLASSES_CACHE_KEY = "UnapprovedClassesCache";
-    private static final String APPROVED_CLASSES_CACHE_KEY = "ApprovedClassesCache";
+public class AdminRedisServiceImpl implements  AdminRedisService{
+    private static final String CLASSMANAGERMENT_CACHE_KEY = "AllClassManagermentCache";
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
@@ -30,44 +29,40 @@ public class AdminRedisServiceImpl {
         this.objectMapper = objectMapper;
     }
 
+    @Override
     public void clear() {
-        boolean isDeleted = redisTemplate.delete(UNAPPROVED_CLASSES_CACHE_KEY);
-        isDeleted = redisTemplate.delete(APPROVED_CLASSES_CACHE_KEY);
-        logger.info("Cache cleared for unapproved and approved classes: {}", isDeleted ? "successful" : "failed");
+        boolean isDeleted = redisTemplate.delete(CLASSMANAGERMENT_CACHE_KEY);
+        logger.info("Đã xóa cache cho danh sách tất cả class mamangerment: {}", isDeleted ? "thành công" : "thất bại");
     }
 
-    public List<TutorClassInfoResponse> getAllUnapprovedClasses() throws JsonProcessingException {
-        return getDataFromCache(UNAPPROVED_CLASSES_CACHE_KEY);
-    }
-
-    public List<TutorClassInfoResponse> getAllApprovedClasses() throws JsonProcessingException {
-        return getDataFromCache(APPROVED_CLASSES_CACHE_KEY);
-    }
-
-    private List<TutorClassInfoResponse> getDataFromCache(String cacheKey) throws JsonProcessingException {
-        if (redisTemplate.hasKey(cacheKey)) {
-            logger.info("Cache hit for key: {}", cacheKey);
-            String jsonData = (String) redisTemplate.opsForValue().get(cacheKey);
-            return objectMapper.readValue(jsonData, new TypeReference<List<TutorClassInfoResponse>>() {});
+    @Override
+    public List<ClassManagerment> getAllClassManagerment() throws JsonProcessingException {
+        if (redisTemplate.hasKey(CLASSMANAGERMENT_CACHE_KEY)) {
+            logger.info("Cache truy xuất thành công cho danh sách tất cả class mamnagerment");
+            String classSManagermentJson = (String) redisTemplate.opsForValue().get(CLASSMANAGERMENT_CACHE_KEY);
+            try {
+                return objectMapper.readValue(classSManagermentJson, new TypeReference<List<ClassManagerment>>() {});
+            } catch (Exception e) {
+                logger.error("Lỗi khi chuyển đổi JSON thành đối tượng", e);
+                return null;
+            }
         } else {
-            logger.info("Cache miss for key: {}", cacheKey);
+            logger.info("Cache không tìm thấy cho danh sách tất cả class managermemnt");
             return null;
         }
     }
 
-    public void saveAllUnapprovedClasses(List<TutorClassInfoResponse> unapprovedClasses) throws JsonProcessingException {
-
-        saveDataToCache(UNAPPROVED_CLASSES_CACHE_KEY, unapprovedClasses);
+    @Override
+    public void saveAllClassManagerment(List<ClassManagerment> classManagerments) throws JsonProcessingException {
+        try {
+            String jsonClassManagerment = objectMapper.writeValueAsString(classManagerments);
+            redisTemplate.opsForValue().set(CLASSMANAGERMENT_CACHE_KEY, jsonClassManagerment);
+            redisTemplate.expire(CLASSMANAGERMENT_CACHE_KEY, Duration.ofHours(1));
+            logger.info("Đã lưu vào cache danh sách tất cả classmanagerment");
+        } catch (Exception e) {
+            logger.error("Lỗi khi chuyển đổi đối tượng thành JSON", e);
+        }
     }
 
-    public void saveAllApprovedClasses(List<TutorClassInfoResponse> approvedClasses) throws JsonProcessingException {
-        saveDataToCache(APPROVED_CLASSES_CACHE_KEY, approvedClasses);
-    }
 
-    private void saveDataToCache(String cacheKey, List<TutorClassInfoResponse> data) throws JsonProcessingException {
-        String jsonData = objectMapper.writeValueAsString(data);
-        redisTemplate.opsForValue().set(cacheKey, jsonData);
-        redisTemplate.expire(cacheKey, Duration.ofHours(1)); // Set cache expiry time (e.g., 1 hour)
-        logger.info("Data saved to cache with key: {}", cacheKey);
-    }
 }
