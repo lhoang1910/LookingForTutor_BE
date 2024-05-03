@@ -1,0 +1,164 @@
+version: '3.8'
+
+services:
+  redis:
+    container_name: redis
+    build: 
+      context: ./Redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ltf_networks
+
+  api_gateway:
+    container_name: api_gateway
+    build: 
+      context: ./Api_Gateway
+    volumes:
+      - "./Api_Gateway:/app"
+    environment:
+      - TZ=UTC
+    ports:
+      - "9090:9090"
+    depends_on:
+      - discovery_server
+    networks:
+      - ltf_networks
+  
+  discovery_server:
+    container_name: discovery_server
+    build: 
+      context: ./Discovery_Server
+    ports:
+      - "8761:8761"
+    networks:
+      - ltf_networks
+
+  admin_service:
+    container_name: admin_service
+    build: 
+      context: ./Admin_Service
+    ports:
+      - "8080:8080"
+    volumes:
+      - "./Admin_Service:/app"
+    depends_on:
+      - redis
+      - discovery_server
+      - api_gateway
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/admin_service
+      - SPRING_REDIS_HOST=redis_ltf
+      - SPRING_REDIS_PORT=6379
+      - TZ=UTC
+    networks:
+      - ltf_networks
+
+  class_service:
+    container_name: class_service
+    build: 
+      context: ./Class_Service
+    ports:
+      - "8081:8081"
+    volumes:
+      - "./Class_Service:/app"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/class_service
+      - TZ=UTC
+    networks:
+      - ltf_networks
+    depends_on:
+      - discovery_server
+      - api_gateway
+
+  payment_service:
+    container_name: payment_service
+    build: 
+      context: ./Payment_Service
+    volumes:
+      - "./Payment_Service:/app"
+    ports:
+      - "8082:8082"
+    depends_on:
+      - redis
+      - api_gateway
+      - discovery_server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/payment_service
+      - SPRING_REDIS_HOST=redis_ltf
+      - SPRING_REDIS_PORT=6379
+      - TZ=UTC
+    networks:
+      - ltf_networks
+
+  student_service:
+    container_name: student_service
+    build: 
+      context: ./Student_Service
+    volumes:
+      - "./Student_Service:/app"
+    ports:
+      - "8083:8083"
+    depends_on:
+      - redis
+      - api_gateway
+      - discovery_server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/student_service
+      - SPRING_REDIS_HOST=redis_ltf
+      - SPRING_REDIS_PORT=6379
+      - TZ=UTC
+    networks:
+      - ltf_networks
+
+  tutor_service:
+    container_name: tutor_service
+    build: 
+      context: ./Tutor_Service
+    volumes:
+      - "./Tutor_Service:/app"
+    ports:
+      - "8084:8084"
+    depends_on:
+      - redis
+      - api_gateway
+      - discovery_server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/tutorservice
+      - SPRING_REDIS_HOST=redis_ltf
+      - SPRING_REDIS_PORT=6379
+      - TZ=UTC
+    networks:
+      - ltf_networks
+
+  user_service:
+    container_name: user_service
+    build: 
+      context: ./User_Service
+    volumes:
+      - "./User_Service:/app"
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/userservice
+      - TZ=UTC
+    depends_on:
+      - api_gateway
+      - discovery_server
+    networks:
+      - ltf_networks
+
+  mysql:
+    container_name: mysql
+    build: 
+       context: ./MySQL
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    networks:
+      - ltf_networks
+
+networks:
+  ltf_networks:
+    driver: bridge
